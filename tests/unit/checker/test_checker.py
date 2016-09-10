@@ -55,4 +55,9 @@ def test_check_yellow():
     assert Checker([1, 2, 3, 4]).check_yellow([0, 1, 3, 4]) == 3
     assert Checker([1, 2, 3, 4]).check_yellow([2, 1, 1, 4]) == 3
 
-def test
+
+def test_integration():
+    assert Checker([1, 2, 3, 4]).check_code([0, 1, 1, 0]) == (0, 1)
+    assert Checker([1, 2, 3, 4]).check_code([0, 2, 2, 0]) == (1, 0)
+    assert Checker([1, 2, 3, 4]).check_code([0, 1, 3, 4]) == (2, 1)
+    assert Checker([1, 2, 3, 4]).check_code([2, 1, 1, 4]) == (1, 2)

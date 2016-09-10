@@ -4,7 +4,7 @@ class Checker(object):
         self.secret_code = secret_code
 
     def check_code(self, code):
-        red, yellow = self.check_red(code), self.check_red(code) - self.check_yellow(code)
+        red, yellow = self.check_red(code), abs(self.check_red(code) - self.check_yellow(code))
         return red, yellow
 
     def check_red(self, code):
