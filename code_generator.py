@@ -1,9 +1,5 @@
 #!usr/bin/env python
 
-COLOURS = (1,2,3,4,5,6,7,8)
-TAM = 4
-ILEGAL_ARGUMENT = "ilegal argument"
-
 class Secuence(): 
     COLOURS = (1,2,3,4,5,6,7,8)
     TAM = 4
@@ -20,9 +16,10 @@ class Secuence():
     def add(self,color):
         if color in COLOURS and len(self.codigo) <= TAM: 
             self.codigo.append(color)
+            return True
         else:
-            raise ValueError(ILEGAL_ARGUMENT)
-            
+            return False 
+
     def delete(self):
         if len(self.codigo) > 0:
             self.codigo.pop()
