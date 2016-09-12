@@ -125,10 +125,10 @@ class MainWindow(Gtk.Window):
 				step += 60
 
 	def select_color(self, eventbox, event):
-
-		posy = int(event.y // 60) + 1
-		self.imagePanel[self.turn][0].set_from_file(self.colors.get(posy))
-		self.turn += 1
+		if event.type == Gdk.EventType.BUTTON_PRESS:
+			posy = int(event.y // 60) + 1
+			self.imagePanel[self.turn][0].set_from_file(self.colors.get(posy))
+			self.turn += 1
 
 	def reset_game(self, button):
 		for image in self.imagePanel:
@@ -136,9 +136,10 @@ class MainWindow(Gtk.Window):
 		self.turn = 0
 
 	def deselect_color(self, eventbox, event):
-		if self.turn > 0:
-			self.turn -= 1
-			self.imagePanel[self.turn][0].set_from_file(self.colors.get(0))
+		if event.type == Gdk.EventType.BUTTON_PRESS:
+			if self.turn > 0:
+				self.turn -= 1
+				self.imagePanel[self.turn][0].set_from_file(self.colors.get(0))
 
 
 mainwindow = MainWindow()
