@@ -17,7 +17,7 @@ def eleccion_procesador():
 
 print eleccion_procesador ()
 
-def eleccion_humano ():
+# def eleccion_humano ():
 	
 	
 	# cuando hace click, se colorean, se cargan en la fila

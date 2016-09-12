@@ -8,152 +8,137 @@ from gi.repository import Gtk, GdkPixbuf, Gdk
 
 
 class MainWindow(Gtk.Window):
-    def __init__(self):
-        Gtk.Window.__init__(self, title="Secret Code")
+	def __init__(self):
+		Gtk.Window.__init__(self, title="Secret Code")
 
-        self.turn = 0
-        self.set_default_size(450, 550)
+		self.turn = 0
+		self.set_default_size(470, 550)
 
-        self.colors = {0: "imgs/default.png",
-                       1: "imgs/blue.png",
-                       2: "imgs/green.png",
-                       3: "imgs/red.png",
-                       4: "imgs/orange.png",
-                       5: "imgs/pink.png",
-                       6: "imgs/purple.png",
-                       7: "imgs/white.png",
-                       8: "imgs/yellow.png"}
+		self.colors = {0: "imgs/default.png",
+					   1: "imgs/blue.png",
+					   2: "imgs/green.png",
+					   3: "imgs/red.png",
+					   4: "imgs/orange.png",
+					   5: "imgs/pink.png",
+					   6: "imgs/purple.png",
+					   7: "imgs/white.png",
+					   8: "imgs/yellow.png"}
 
-        fixed = Gtk.Fixed()
-        fixed.put(self.botones(), 0, 0)
-        fixed.put(self.temp(), 10, 50)
-        fixed.put(self.codigoPanel(), 100, 50)
-        fixed.put(self.aciertos(), 345, 75)
-        self.add(fixed)
+		fixedMain = self.fixed_creator(0, 0, 0)
+		fixedMain.put(self.buttons(), 0, 0)
+		fixedMain.put(self.colorOptions(), 10, 50)
+		fixedMain.put(self.colorsScreen(), 90, 50)
+		fixedMain.put(self.hits(), 345, 75)
+		self.add(fixedMain)
 
-    def temp(self):
-        frame = Gtk.Frame()
-        fixed = Gtk.Fixed()
+	def colorOptions(self):
+		frameColorOptions = self.frame_creator(0, 60, 400)
+		fixedColorOptions = self.fixed_creator(5, 0, 0)
 
-        blue = Gtk.Image()
-        pixbufblue = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(1), 50, 50, False)
-        blue.set_from_pixbuf(pixbufblue)
+		self.panel_color_options(fixedColorOptions)
 
-        green = Gtk.Image()
-        pixbufgreen = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(2), 50, 50, False)
-        green.set_from_pixbuf(pixbufgreen)
+		eventBoxColorOptions = Gtk.EventBox()
+		eventBoxColorOptions.add(fixedColorOptions)
+		eventBoxColorOptions.connect("button-press-event", self.select_color)
 
-        red = Gtk.Image()
-        pixbufred = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(3), 50, 50, False)
-        red.set_from_pixbuf(pixbufred)
+		frameColorOptions.add(eventBoxColorOptions)
+		return frameColorOptions
 
-        orange = Gtk.Image()
-        pixbufblue = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(4), 50, 50, False)
-        orange.set_from_pixbuf(pixbufblue)
+	def colorsScreen(self):
 
-        pink = Gtk.Image()
-        pixbufblue = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(5), 50, 50, False)
-        pink.set_from_pixbuf(pixbufblue)
+		frameColorScreen = self.frame_creator(0, 250, 350)
+		fixedColorScreen = self.fixed_creator(10, 10, 10)
 
-        purple = Gtk.Image()
-        pixbufblue = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(6), 50, 50, False)
-        purple.set_from_pixbuf(pixbufblue)
+		self.imagePanel = []
+		self.panel_creator_default(self.imagePanel, fixedColorScreen)
 
-        white = Gtk.Image()
-        pixbufblue = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(7), 50, 50, False)
-        white.set_from_pixbuf(pixbufblue)
+		eventBoxColorScreen = Gtk.EventBox()
+		eventBoxColorScreen.add(fixedColorScreen)
+		eventBoxColorScreen.connect("button-press-event", self.deselect_color)
 
-        yellow = Gtk.Image()
-        pixbufblue = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(8), 50, 50, False)
-        yellow.set_from_pixbuf(pixbufblue)
+		frameColorScreen.add(eventBoxColorScreen)
+		return frameColorScreen
 
-        fixed.put(blue, 0, 0)
-        fixed.put(green, 0, 60)
-        fixed.put(red, 0, 120)
-        fixed.put(orange, 0, 180)
-        fixed.put(pink, 0, 240)
-        fixed.put(purple, 0, 300)
-        fixed.put(white, 0, 360)
-        fixed.put(yellow, 0, 420)
+	def hits(self):
 
-        eventBox = Gtk.EventBox()
-        eventBox.add(fixed)
-        eventBox.connect("button-press-event", self.select_color)
+		frameHits = self.frame_creator(10, 105, 200)
+		fixedHits = self.fixed_creator(5, 5, 5)
 
-        frame.add(eventBox)
-        return frame
+		self.colorHits = []
+		self.panel_creator_default(self.colorHits, fixedHits, 20, 20, 25, 70)
 
-    def codigoPanel(self):
+		frameHits.add(fixedHits)
+		return frameHits
 
-        frame = Gtk.Frame()
-        fixed = Gtk.Fixed()
+	def buttons(self):
 
-        self.imagePanel = []
+		fixedButtons = self.fixed_creator(0, 0, 0)
+		# buttonStart = Gtk.Button("Compare")
+		buttonReset = Gtk.Button("Reset and New Game")
 
-        step = 0
-        step2 = 0
-        for z in range(0, 6):
-            for i in range(0, 4):
-                self.tempImage = Gtk.Image()
-                pixbufgreen = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(0), 50, 50, False)
-                self.tempImage.set_from_pixbuf(pixbufgreen)
-                self.imagePanel.append([self.tempImage, 0 + step, step2])
-                step += 60
-            step2 += 80
-            step = 0
+		buttonReset.connect("clicked", self.reset_game)
 
-        for image in self.imagePanel:
-            fixed.put(image[0], image[1], image[2])
+		# fixedButtons.put(buttonStart, 10, 10)
+		fixedButtons.put(buttonReset, 100, 10)
 
-        frame.add(fixed)
-        return frame
+		return fixedButtons
 
-    def aciertos(self):
-        frame = Gtk.Frame()
-        fixed = Gtk.Fixed()
+	def frame_creator(self, frameMarginLeft, frameWidth, frameHeight):
+		frame = Gtk.Frame()
+		frame.set_margin_left(frameMarginLeft)
+		frame.set_size_request(frameWidth, frameHeight)
 
-        step = 0
-        step2 = 0
-        for z in range(0, 6):
+		return frame
 
-            for i in range(0, 4):
-                temp = Gtk.Image()
-                pixbufgreen = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(0), 20, 20, False)
-                temp.set_from_pixbuf(pixbufgreen)
-                fixed.put(temp, 0 + step, step2)
-                step += 25
-            step2 += 70
-            step = 0
+	def fixed_creator(self, marginLeft, marginBottom, marginTop):
+		fixed = Gtk.Fixed()
+		fixed.set_margin_left(marginLeft)
+		fixed.set_margin_bottom(marginBottom)
+		fixed.set_margin_top(marginTop)
 
-        frame.add(fixed)
-        return frame
+		return fixed
 
-    def botones(self):
+	def panel_creator_default(self, toList, fixed, width=50, height=50, jump_one=60, jump_two=80):
 
-        fixed = Gtk.Fixed()
-        buttonStart = Gtk.Button("Start")
-        buttonReset = Gtk.Button("Reset")
+		step = 0
+		step2 = 0
+		for z in range(0, 6):
+			for i in range(0, 4):
+				colorImage = Gtk.Image()
+				colorHitPixbuff = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.colors.get(0), width, height, False)
+				colorImage.set_from_pixbuf(colorHitPixbuff)
+				toList.append([colorImage, 0 + step, step2])
+				step += jump_one
+			step2 += jump_two
+			step = 0
 
-        buttonReset.connect("clicked", self.reset_game)
+		for colorImage in toList:
+			fixed.put(colorImage[0], colorImage[1], colorImage[2])
 
-        fixed.put(buttonStart, 10, 10)
-        fixed.put(buttonReset, 100, 10)
+	def panel_color_options(self, fixed):
+		step = 0
+		for key, imagePath in self.colors.items():
+			if not key == 0:
+				colorOption = Gtk.Image()
+				colorOption.set_from_file(imagePath)
+				fixed.put(colorOption, 0, step)
+				step += 60
 
-        return fixed
+	def select_color(self, eventbox, event):
 
-    def select_color(self, eventbox, event):
+		posy = int(event.y // 60) + 1
+		self.imagePanel[self.turn][0].set_from_file(self.colors.get(posy))
+		self.turn += 1
 
-        posy = int(event.y // 60) + 1
-        self.imagePanel[self.turn][0].set_from_file(self.colors.get(posy))
-        self.turn += 1
+	def reset_game(self, button):
+		for image in self.imagePanel:
+			image[0].set_from_file(self.colors.get(0))
+		self.turn = 0
 
-        print self.turn
-        print (posy)
-
-    def reset_game(self, button):
-        for image in self.imagePanel:
-            image[0].set_from_file(self.colors.get(0))
-        self.turn = 0
+	def deselect_color(self, eventbox, event):
+		if self.turn > 0:
+			self.turn -= 1
+			self.imagePanel[self.turn][0].set_from_file(self.colors.get(0))
 
 
 mainwindow = MainWindow()
