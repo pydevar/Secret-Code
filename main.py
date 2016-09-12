@@ -20,11 +20,11 @@ class MainWindow(Gtk.Window):
         self.button_size = 50
         self.secret_code = Generator.create()
         self.code = []
-        self.show_secret_code = False
+        self.secret_code_status = False
         self.get_time = lambda: int(round(time() * 1000))
         self.last_time = self.get_time()
         fixed = Gtk.Fixed()
-        fixed.put(self.botones(), 0, 0)
+        fixed.put(self.add_buttons(), 0, 0)
         fixed.put(self.add_options(), 10, 50)
         fixed.put(self.add_secret_code(), 100, 50)
         fixed.put(self.add_code_panel(), 100, 110)
@@ -87,9 +87,7 @@ class MainWindow(Gtk.Window):
         return frame
 
     def add_code_panel(self):
-        """"
-        Just creates the code Entry Panel
-        """
+        """"Creates the code Entry Panel"""
         frame = Gtk.Frame()
         fixed = Gtk.Fixed()
         self.code_panel = []
@@ -115,9 +113,7 @@ class MainWindow(Gtk.Window):
         return frame
 
     def add_guess_panel(self):
-        """
-        Just creates the guess panel
-        """
+        """Creates the guess panel"""
         frame = Gtk.Frame()
         fixed = Gtk.Fixed()
         self.guess_panel = []
@@ -138,11 +134,11 @@ class MainWindow(Gtk.Window):
         frame.add(fixed)
         return frame
 
-    def botones(self):
-
+    def add_buttons(self):
+        """Creates buttons"""
         fixed = Gtk.Fixed()
         buttonReset = Gtk.Button("Reset")
-        buttonReset.connect("clicked", self.clicked_start)
+        buttonReset.connect("clicked", self.clicked_reset)
         buttonToggle = Gtk.Button("Toggle")
         buttonToggle.connect("clicked", self.clicked_toggle)
 
@@ -152,64 +148,57 @@ class MainWindow(Gtk.Window):
         return fixed
 
     def is_double_click(self):
+        """Returns True if it is a double_click, else False"""
         current_time = self.get_time()
         result = current_time - self.last_time < 10
         self.last_time = current_time
         return result
 
-    def clicked_start(self, widget):
+    def clicked_reset(self, widget):
+        """Resets secret code, doesn't show it. Remove code and guesses"""
         self.new_secret_code()
         self.remove_all_code_and_guesses()
 
     def clicked_options(self, eventbox, event):
-        """
-        When button is pressed, it creates an event
-        This is handled here.
-        """
+        """Handler for options_panel clicked"""
         if self.is_double_click():
             return
-        posx = int(event.x)
-        posy = int(event.y // 60)
-
         for color in range(1, 9):
-            if posy == color - 1:
+            if int(event.y // 60) == color - 1:
                 self.code_panel[self.turn][0].set_from_file(self.get_colors(color))
                 self.add_code(color)
 
     def clicked_code_panel(self, eventbox, event):
-        """
-        When button is pressed, it creates an event
-        This is handled here.
-        """
-        posx = int(event.x)
-        posy = int(event.y)
-
+        """Handler for code_panel clicked"""
         # Validate through y
         y0 = (self.turn // 4) * self.Y_STEP
         ymax = y0 + self.button_size
-        if not (y0 <= posy <= ymax):
+        if not (y0 <= int(event.y) <= ymax):
             return
 
         # Validate through x
         for index in range(0, 4):
             x0 = index * (self.button_size * 1.2)
             xmax = x0 + self.button_size
-            if x0 <= posx <= xmax:
+            if x0 <= int(event.x) <= xmax:
                 self.remove_code(index)
 
     def clicked_toggle(self, widget):
-        self.show_code()
+        """Handler for toggle button clicked"""
+        self.show_secret_code()
 
     def update_code(self, values):
-        lista = values[:]
-        current_length = len(lista)
+        """Updates current turn's code"""
+        code = values[:]
+        current_length = len(code)
         for i in range(4 - current_length):
-            lista.append(0)
+            code.append(0)
 
         for i in range(4):
-            self.code_panel[(self.turn // 4) * 4 + i][0].set_from_file(self.get_colors(lista[i]))
+            self.code_panel[(self.turn // 4) * 4 + i][0].set_from_file(self.get_colors(code[i]))
 
     def remove_all_code_and_guesses(self):
+        """Removes all code and guesses from panels"""
         for j in range(self.number_of_guesses):
             for i in range(4):
                 self.code_panel[j * 4 + i][0].set_from_file(self.get_colors(0))
@@ -218,38 +207,53 @@ class MainWindow(Gtk.Window):
         self.code = []
 
     def update_guesses(self, values):
+        """Updates guesses panel"""
         for i in range(4):
             self.guess_panel[self.turn - 4 + i][0].set_from_file(self.get_colors(values[i]))
 
     def update_secret_code(self, values):
+        """Updates secret code panel"""
         for i in range(4):
             self.secret_panel[i][0].set_from_file(self.get_colors(values[i]))
 
 # Logic starts here
     def new_secret_code(self):
+        """Creates a new code. Do not show it."""
         self.secret_code = Generator.create()
-        self.show_code(force=False)
+        self.show_secret_code(force=False)
 
     def check_guesses(self, guesses):
+        """
+        Check current code with secret code,
+        Update guesses panel,
+        Reset current code,
+        Check for win hand.
+        """
         if self.turn % 4 == 0:
             values = Checker(self.secret_code).check_code(guesses)
             self.update_guesses(values)
             self.code = []
 
             if all(value == 1 for value in values):
-                self.show_code(force=True)
+                self.show_secret_code(force=True)
 
-    def show_code(self, force=None):
-        self.show_secret_code = not self.show_secret_code if force is None else force
-        values = [0] * 4 if not self.show_secret_code else self.secret_code
+    def show_secret_code(self, force=None):
+        """
+        Toggle to show secret code
+        :param force: If it is set to True, is shown, to False is not shown
+        """
+        self.secret_code_status = not self.secret_code_status if force is None else force
+        values = [0] * 4 if not self.secret_code_status else self.secret_code
         self.update_secret_code(values)
 
     def add_code(self, color):
+        """Add color to current code"""
         self.code.append(color)
         self.turn += 1
         self.check_guesses(self.code)
 
     def remove_code(self, position):
+        """Remove position from current code, and update code."""
         try:
             self.code.pop(position)
             self.turn -= 1
