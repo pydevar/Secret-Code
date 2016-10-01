@@ -3,6 +3,7 @@
 
 import gi
 from src.colors.colors import Colors
+from src.generator.secret_code import SecretCode
 
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, Gdk
@@ -12,17 +13,17 @@ class MainWindow(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self, title="Secret Code")
 
-		self.turn = 0
 		self.set_default_size(470, 550)
 		self.color = Colors()
 		self.add(self.fixeds_main())
+		self.start_game()
 
 	def fixeds_main(self):
 		fixed_main = self.fixed_creator(0, 0, 0)
 		fixed_main.put(self.buttons(), 0, 0)
 		fixed_main.put(self.color_options(), 10, 50)
 		fixed_main.put(self.colors_screen(), 90, 50)
-		fixed_main.put(self.hits(), 345, 75)
+		fixed_main.put(self.hits_screen(), 345, 75)
 
 		return fixed_main
 
@@ -51,7 +52,7 @@ class MainWindow(Gtk.Window):
 		frame_color_screen.add(evntbox_color_screen)
 		return frame_color_screen
 
-	def hits(self):
+	def hits_screen(self):
 
 		frame_hits = self.frame_creator(10, 105, 200)
 		fixed_hits = self.fixed_creator(5, 5, 5)
@@ -117,21 +118,87 @@ class MainWindow(Gtk.Window):
 				step += 60
 
 	def select_color(self, eventbox, event):
+		post_y = int(event.y // 60) + 1
+
 		if event.type == Gdk.EventType.BUTTON_PRESS:
-			posy = int(event.y // 60) + 1
-			self.image_panel[self.turn][0].set_from_file(self.color.get_color(posy))
-			self.turn += 1
+			if self.turn<24:
+				self.image_panel[self.turn][0].set_from_file(self.color.get_color(post_y))
+				self.turn += 1
+
+				if self.turn<=4:
+					self.guesses[0].append(post_y-1)
+					self.guess_hints()
+				if  4< self.turn <=8:
+					self.guesses[1].append(post_y-1)
+					self.guess_hints()
+				if 8<self.turn <= 12:
+					self.guesses[2].append(post_y-1)
+					self.guess_hints()
+				if 12<self.turn <= 16:
+					self.guesses[3].append(post_y-1)
+					self.guess_hints()
+				if  16<self.turn <= 20:
+					self.guesses[4].append(post_y-1)
+					self.guess_hints()
+				if 20<self.turn <= 24:
+					self.guesses[5].append(post_y-1)
+					self.guess_hints()
+
+	def guess_hints(self):
+		print "este es",self.secret_code.get_secret_code()
+		self.code_guess_turn=self.turn//4-1
+
+		if self.check_turn_hints():
+			self.secret_code.compare_codes(self.guesses[self.code_guess_turn])
+			print self.guesses[self.code_guess_turn]
+			print self.secret_code.get_hints()
+			self.recolour_hits(self.code_guess_turn)
+
+	def check_turn_hints(self):
+		return self.turn !=0 and self.turn % 4==0
+
+	def recolour_hits(self, turn):
+
+		for i in range(0 + (turn*4),4 + (turn*4),1):
+			pixbuf_hits = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.color.get_color(self.secret_code.get_hints()[i%4]), 20, 20, False)
+			self.color_hits[i][0].set_from_pixbuf(pixbuf_hits)
+
+	def reset_hits(self):
+		for hit in self.color_hits:
+			start_pixbuff=GdkPixbuf.Pixbuf.new_from_file_at_scale(self.color.get_color(0), 20, 20, False)
+			hit[0].set_from_pixbuf(start_pixbuff)
 
 	def reset_game(self, button):
 		for image in self.image_panel:
 			image[0].set_from_file(self.color.get_color(0))
+
+		self.start_game()
+		self.reset_hits()
+
+	def start_game(self):
 		self.turn = 0
+		self.guesses = [[], [], [], [], [], []]
+		self.secret_code = SecretCode()
+
 
 	def deselect_color(self, eventbox, event):
 		if event.type == Gdk.EventType.BUTTON_PRESS:
-			if self.turn > 0:
-				self.turn -= 1
-				self.image_panel[self.turn][0].set_from_file(self.color.get_color(0))
+			if self.turn == 24:
+				pass
+			elif self.turn ==18:
+				pass
+			elif self.turn == 12:
+				pass
+			elif self.turn == 8:
+				pass
+			elif self.turn == 4:
+				pass
+			elif self.turn > 0:
+					self.guesses[self.turn // 4].pop()
+					self.turn -= 1
+					self.image_panel[self.turn][0].set_from_file(self.color.get_color(0))
+
+
 
 
 main = MainWindow()

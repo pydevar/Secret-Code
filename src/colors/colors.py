@@ -15,5 +15,6 @@ class Colors(object):
 
 		return self.color.get(id)
 
+
 	def get_dictionary(self):
 		return self.color.iteritems()
