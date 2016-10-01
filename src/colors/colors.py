@@ -12,9 +12,7 @@ class Colors(object):
 				   8: "imgs/yellow.png"}
 
 	def get_color(self,id):
-
 		return self.color.get(id)
-
 
 	def get_dictionary(self):
 		return self.color.iteritems()

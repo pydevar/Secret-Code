@@ -1,3 +1,2 @@
 # Secret-Code
-# -Ignacio Bado
-# -Ignacio Bado
+# - Version Daniel
